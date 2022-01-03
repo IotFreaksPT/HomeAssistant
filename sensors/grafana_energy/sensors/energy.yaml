@@ -3,7 +3,7 @@
       unique_id: "energy_invoice_year"
       state: >
         {% set invoice_start_day = 11 %}
-        {% if now().day > 1 and now().day <=invoice_start_day %}
+        {% if now().day >= 1 and now().day <=invoice_start_day %}
           {{ (now() - timedelta(days=invoice_start_day)).year }}
         {% else %}
           {{ now().year }}
