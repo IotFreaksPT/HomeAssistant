@@ -1,4 +1,4 @@
 # HomeAssistant
 
-## Nuno was here
-## Diogo Followed
+## Nuno was here!
+## Diogo Followed!
