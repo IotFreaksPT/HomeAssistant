@@ -1,0 +1,9 @@
+influxdb:
+  host: localhost
+  max_retries: 5
+  username: homeassistant
+  password: homeassistant
+  database: home_assistant
+  include:
+    entity_globs:
+      - "sensor.energy_*_usage"

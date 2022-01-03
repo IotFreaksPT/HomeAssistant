@@ -1,0 +1,32 @@
+- sensor:
+    - name: "energy_invoice_year"
+      unique_id: "energy_invoice_year"
+      state: >
+        {% set invoice_start_day = 11 %}
+        {% if now().day > 1 and now().day <=invoice_start_day %}
+          {{ (now() - timedelta(days=invoice_start_day)).year }}
+        {% else %}
+          {{ now().year }}
+        {% endif %}
+    - name: "energy_invoice_month"
+      unique_id: "energy_invoice_month"
+      state: >
+        {% set invoice_start_day = 11 %}
+        {% if now().day >= 1 and now().day <=invoice_start_day %}
+          {{ (now() - timedelta(days=invoice_start_day)).month }}
+        {% else %}
+          {{ now().month }}
+        {% endif %}
+    - name: "energy_main_usage"
+      unique_id: "energy_main_usage"
+      state: "{{states('sensor.main_power')|float}}"
+      attributes:
+        device_type: "main"
+        power: "{{states('sensor.main_power')|float}}"
+        amp: "{{ states('sensor.main_power')|float/states('sensor.main_voltage')|float }}"
+        volt: "{{ states('sensor.main_voltage')|float }}"
+        invoice_month: "{{ '%02i'|format(states('sensor.energy_invoice_month')|int) }}"
+        invoice_year: "{{ states('sensor.energy_invoice_year') }}"
+        tarif: "{{ states('utility_meter.daily_energy') }}"
+        kwh_price: "{{ states('sensor.energy_price')|float }}"
+        daily_price: "{{ states('sensor.energy_daily')|float }}"

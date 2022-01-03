@@ -1,0 +1,100 @@
+automation:
+  - alias: utility_meter_tariff
+    id: utility_meter_tariff
+    trigger:
+      - platform: time_pattern
+        minutes: "/1"
+    action:
+      - choose:
+          conditions:
+            - condition: or
+              conditions:
+                - condition: time
+                  after: "22:00:00"
+                  before: "00:00:00"
+                - condition: time
+                  after: "00:00:00"
+                  before: "07:00:00"
+          sequence:
+            - service: utility_meter.select_tariff
+              target:
+                entity_id:
+                  - utility_meter.daily_energy
+                  - utility_meter.monthly_energy
+              data:
+                tariff: offpeak
+        default:
+          - service: utility_meter.select_tariff
+            target:
+              entity_id:
+                - utility_meter.daily_energy
+                - utility_meter.monthly_energy
+            data:
+              tariff: peak
+
+utility_meter:
+  daily_energy:
+    source: sensor.main_energy
+    name: daily_energy
+    cycle: daily
+    tariffs:
+      - peak
+      - offpeak
+  monthly_energy:
+    source: sensor.main_energy
+    name: monthly_energy
+    cycle: monthly
+    tariffs:
+      - peak
+      - offpeak
+
+sensor:
+  - platform: template
+    sensors:
+      energy_peak:
+        unique_id: "sensor_energy_peak"
+        device_class: energy
+        value_template: "{{states('sensor.daily_energy_peak')}}"
+        attribute_templates:
+          state_class: "{{state_attr('sensor.daily_energy_peak','state_class')}}"
+          last_reset: "{{state_attr('sensor.daily_energy_peak','last_reset')}}"
+          unit_of_measurement: "{{state_attr('sensor.daily_energy_peak','unit_of_measurement')}}"
+      energy_offpeak:
+        unique_id: "sensor_energy_offpeak"
+        device_class: energy
+        value_template: "{{states('sensor.daily_energy_offpeak')}}"
+        attribute_templates:
+          state_class: "{{state_attr('sensor.daily_energy_offpeak','state_class')}}"
+          last_reset: "{{state_attr('sensor.daily_energy_offpeak','last_reset')}}"
+          unit_of_measurement: "{{state_attr('sensor.daily_energy_offpeak','unit_of_measurement')}}"
+      energy_price:
+        unit_of_measurement: "€"
+        value_template: >
+          {% if is_state('utility_meter.daily_energy','offpeak') %}
+            {{states('input_number.energy_price_offpeak')|float / 100}}
+          {% else %}
+            {{states('input_number.energy_price_peak')|float / 100}}
+          {% endif %}
+      energy_daily:
+        unit_of_measurement: "€"
+        value_template: "{{states('input_number.energy_price_daily')|float / 100}}"
+
+input_number:
+  energy_price_daily:
+    name: price_daily
+    min: 0
+    max: 100
+    step: 0.01
+    mode: box
+  energy_price_peak:
+    name: peak_price
+    min: 0
+    max: 100
+    step: 0.01
+    mode: box
+  energy_price_offpeak:
+    name: offpeak_price
+    min: 0
+    max: 100
+    step: 0.01
+    mode: box
