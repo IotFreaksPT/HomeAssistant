@@ -1,7 +1,3 @@
 # HomeAssistant
 
-## Nuno was here!
-
-## Diogo Followed!
-
-Push SSH
+Neste repo cada um pode adicionar tudo relacionado com Home Assistant!
