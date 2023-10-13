@@ -1,0 +1,39 @@
+id: "011329a3-874d-4760-8bab-53c71e668f2f"
+alias: kitchen_kitchen_cabinet_light_on
+description: Liga Presença Cozinha
+mode: restart
+trigger:
+  - platform: state
+    entity_id: binary_sensor.kitchen_motion1_occupancy
+    from: "off"
+    to: "on"
+condition:
+  - condition: state
+    entity_id: "light.kitchen_cabinet_light"
+    state: "off"
+  - condition: state
+    entity_id: "binary_sensor.kitchen_light"
+    state: "off"
+action:
+  - service: light.turn_on
+    target:
+      entity_id: light.kitchen_cabinet_light
+  - wait_for_trigger:
+      - id: trigger
+        platform: state
+        entity_id: binary_sensor.kitchen_motion1_occupancy
+        from: "on"
+        to: "off"
+        for: "00:00:60"
+      - id: cancel
+        platform: state
+        entity_id: light.kitchen_cabinet_light
+        from: "on"
+        to: "off"
+  - alias: "Check trigger or cancel"
+    choose:
+      - conditions: "{{wait.trigger.id == 'trigger'}}"
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: light.kitchen_cabinet_light
