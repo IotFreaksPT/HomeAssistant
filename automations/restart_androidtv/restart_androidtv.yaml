@@ -1,0 +1,35 @@
+id: 34a4f6f0-b42f-480d-b89c-66633a3c46d6
+alias: restart_androidtv_integrations
+description: Restart AndroidTV integrations
+mode: restart
+trigger:
+  - platform: time_pattern
+    minutes: "/1"
+  - platform: state
+    entity_id:
+      - media_player.bedroom_androidtv
+      - media_player.kidsroom1_androidtv
+      - media_player.kitchen_androidtv
+      - media_player.livingroom_androidtv
+    to: "unavailable"
+action:
+  - if:
+      - "{{ trigger.entity_id is defined }}"
+    then:
+      - service: homeassistant.reload_config_entry
+        target:
+          entity_id: "{{ trigger.entity_id }}"
+    else:
+      - repeat:
+          for_each:
+            - media_player.bedroom_androidtv
+            - media_player.kidsroom1_androidtv
+            - media_player.kitchen_androidtv
+            - media_player.livingroom_androidtv
+          sequence:
+            - if:
+                - "{{ is_state( repeat.item, 'unavailable' ) }}"
+              then:
+                - service: homeassistant.reload_config_entry
+                  target:
+                    entity_id: "{{ repeat.item }}"
